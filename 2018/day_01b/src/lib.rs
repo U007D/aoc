@@ -42,7 +42,8 @@
 
 use std::{
     collections::HashSet,
-    result::Result as StdResult
+    iter::FromIterator,
+    result::Result as StdResult,
 };
 
 pub use {
@@ -56,7 +57,7 @@ pub mod error;
 pub type Result<T> = StdResult<T, Error>;
 
 pub fn find_first_repeating_freq(args: Vec<String>) -> Result<i32> {
-    let mut freqs = HashSet::<i32>::new();
+    let mut freqs = HashSet::<i32>::from_iter([0_i32].iter().cloned());
     match args.iter()
               .cycle()
               .map(|s| s.parse::<i32>()
@@ -64,13 +65,13 @@ pub fn find_first_repeating_freq(args: Vec<String>) -> Result<i32> {
               .try_fold(0_i32, |freq, delta| match delta {
                   Ok(v) => {
                       freq.checked_add(v)
-                      .ok_or(Error::Overflow)
-                      .and_then(|freq| {
-                          match freqs.insert(freq) {
-                              true => Ok(freq),
-                              false => Err(Error::RepeatedFrequency(freq)),
-                          }
-                      })
+                          .ok_or(Error::Overflow)
+                          .and_then(|freq| {
+                              match freqs.insert(freq) {
+                                  true => Ok(freq),
+                                  false => Err(Error::RepeatedFrequency(freq)),
+                              }
+                          })
                   },
                   e => e,
               }) {
