@@ -5,13 +5,13 @@
 //!
 //! For example, using the same list of changes above, the device would loop as follows:
 //!
-//!     Current frequency  0, change of +1; resulting frequency  1.
-//!     Current frequency  1, change of -2; resulting frequency -1.
-//!     Current frequency -1, change of +3; resulting frequency  2.
-//!     Current frequency  2, change of +1; resulting frequency  3.
-//!     (At this point, the device continues from the start of the list.)
-//!     Current frequency  3, change of +1; resulting frequency  4.
-//!     Current frequency  4, change of -2; resulting frequency  2, which has already been seen.
+//!   Current frequency  0, change of +1; resulting frequency  1.
+//!   Current frequency  1, change of -2; resulting frequency -1.
+//!   Current frequency -1, change of +3; resulting frequency  2.
+//!   Current frequency  2, change of +1; resulting frequency  3.
+//!   (At this point, the device continues from the start of the list.)
+//!   Current frequency  3, change of +1; resulting frequency  4.
+//!   Current frequency  4, change of -2; resulting frequency  2, which has already been seen.
 //!
 //! In this example, the first frequency reached twice is 2. Note that your device might need to repeat its list of
 //! frequency changes many times before a duplicate frequency is found, and that duplicates might be found while in the
@@ -19,17 +19,17 @@
 //!
 //! Here are other examples:
 //!
-//!     +1, -1 first reaches 0 twice.
-//!     +3, +3, +4, -2, -4 first reaches 10 twice.
-//!     -6, +3, +8, +5, -6 first reaches 5 twice.
-//!     +7, +7, -2, -7, -4 first reaches 14 twice.
+//!   +1, -1 first reaches 0 twice.
+//!   +3, +3, +4, -2, -4 first reaches 10 twice.
+//!   -6, +3, +8, +5, -6 first reaches 5 twice.
+//!   +7, +7, -2, -7, -4 first reaches 14 twice.
 //!
 //! What is the first frequency your device reaches twice?
 
 #![warn(clippy::all)]
 #![forbid(unsafe_code)] // Do not remove!  Explicitly change to #![allow(unsafe_code)] to use `unsafe` keyword.
 #![forbid(overflowing_literals)]
-#![deny(warnings)]
+//#![deny(warnings)]
 //#![deny(missing_docs)]
 // Uncomment before ship to reconcile use of possibly redundant crates and uncover possible debug remnants
 //#![warn(clippy::multiple_crate_versions, clippy::print_stdout, clippy::unimplemented, clippy::use_debug)]
@@ -44,39 +44,54 @@ use std::{
     collections::HashSet,
     iter::FromIterator,
     result::Result as StdResult,
+    str::FromStr
 };
+
+use num_traits::PrimInt;
 
 pub use {
     consts::*,
     error::Error,
 };
+use std::num::ParseIntError;
+use std::hash::Hash;
 
 mod consts;
+#[cfg(test)]
+mod unit_tests;
+
 pub mod error;
 
 pub type Result<T> = StdResult<T, Error>;
 
-pub fn find_first_repeating_freq(args: Vec<String>) -> Result<i32> {
-    let mut freqs = HashSet::<i32>::from_iter([0_i32].iter().cloned());
-    match args.iter()
-              .cycle()
-              .map(|s| s.parse::<i32>()
-                        .or_else(|e| Err(Error::InvalidInputError(e))))
-              .try_fold(0_i32, |freq, delta| match delta {
-                  Ok(v) => {
-                      freq.checked_add(v)
-                          .ok_or(Error::Overflow)
-                          .and_then(|freq| {
-                              match freqs.insert(freq) {
-                                  true => Ok(freq),
-                                  false => Err(Error::RepeatedFrequency(freq)),
-                              }
-                          })
-                  },
-                  e => e,
-              }) {
-        Err(Error::RepeatedFrequency(f)) => Ok(f),
-        Err(e) => Err(e),
-        Ok(_) => unreachable!(),
-    }
+pub fn find_first_repeating_frequency<I, V>(deltas: I) -> Result<V>
+                                                    where I: IntoIterator<Item = Result<V>>,
+                                                          I::IntoIter: Clone,
+                                                          V: Default + Eq + Hash + PrimInt, {
+    let mut freqs = HashSet::<V>::from_iter([V::default()].iter().cloned());
+    freq_iter(deltas).find(|res| !freqs.insert(res.clone().unwrap_or_default()))
+                     .expect(msg::ERR_INTERNAL_EXHAUSTED_DELTA_VALUES)
 }
+
+fn freq_iter<I, V>(deltas: I) -> impl Iterator<Item = Result<V>>
+                                         where I: IntoIterator<Item = Result<V>>,
+                                               I::IntoIter: Clone,
+                                               V: Default + PrimInt, {
+    let init = Ok(V::default());
+    deltas.into_iter()
+          .cycle()
+          .scan(init, |freq, delta| {
+              *freq = freq.clone().and_then(|f| delta.and_then(|d| f.checked_add(&d)
+                                                     .ok_or_else(|| Error::Overflow)));
+              Some(freq.clone())
+          })
+}
+
+pub fn strings_to_values<I, S, V>(string_deltas: S) -> impl Iterator<Item = Result<V>>
+                                             where I: IntoIterator<Item = V>,
+                                                   S: IntoIterator<Item = String>,
+                                                   V: Default + FromStr<Err = ParseIntError> + PrimInt, {
+    string_deltas.into_iter()
+                 .map(|s| s.parse::<V>().map_err(Error::InvalidInputError))
+}
+

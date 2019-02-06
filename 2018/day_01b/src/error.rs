@@ -4,7 +4,7 @@ use std::io::Error as StdIoError;
 pub use wrapped::IoError as IoError;
 mod wrapped;
 
-#[derive(Debug, Display, From, PartialEq)]
+#[derive(Clone, Debug, Display, From, PartialEq)]
 pub enum Error {
     EnvVarError(std::env::VarError),
     InvalidInputError(std::num::ParseIntError),
@@ -12,7 +12,7 @@ pub enum Error {
     #[display(fmt = "{}", "msg::ERR_OVERFLOW_I32")]
     Overflow,
     RepeatedFrequency(i32),
-    NoMoreArgs,
+    NoMoreDeltas,
 }
 
 impl From<StdIoError> for Error {
