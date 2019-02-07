@@ -42,7 +42,9 @@
 
 use std::{
     collections::HashSet,
+    hash::Hash,
     iter::FromIterator,
+    num::ParseIntError,
     result::Result as StdResult,
     str::FromStr
 };
@@ -53,8 +55,6 @@ pub use {
     consts::*,
     error::Error,
 };
-use std::num::ParseIntError;
-use std::hash::Hash;
 
 mod consts;
 #[cfg(test)]
@@ -65,33 +65,33 @@ pub mod error;
 pub type Result<T> = StdResult<T, Error>;
 
 pub fn find_first_repeating_frequency<I, V>(deltas: I) -> Result<V>
-                                                    where I: IntoIterator<Item = Result<V>>,
-                                                          I::IntoIter: Clone,
-                                                          V: Default + Eq + Hash + PrimInt, {
+                                                       where I: IntoIterator<Item = Result<V>>,
+                                                             I::IntoIter: Clone,
+                                                             V: Default + Eq + Hash + PrimInt, {
     let mut freqs = HashSet::<V>::from_iter([V::default()].iter().cloned());
-    freq_iter(deltas).find(|res| !freqs.insert(res.clone().unwrap_or_default()))
+    freq_iter(deltas).find(|res| !freqs.insert(*res.as_ref().unwrap_or(&V::default())))
                      .expect(msg::ERR_INTERNAL_EXHAUSTED_DELTA_VALUES)
 }
 
 fn freq_iter<I, V>(deltas: I) -> impl Iterator<Item = Result<V>>
-                                         where I: IntoIterator<Item = Result<V>>,
-                                               I::IntoIter: Clone,
-                                               V: Default + PrimInt, {
+                              where I: IntoIterator<Item = Result<V>>,
+                                    I::IntoIter: Clone,
+                                    V: Default + PrimInt, {
     let init = Ok(V::default());
     deltas.into_iter()
           .cycle()
           .scan(init, |freq, delta| {
-              *freq = freq.clone().and_then(|f| delta.and_then(|d| f.checked_add(&d)
-                                                     .ok_or_else(|| Error::Overflow)));
+              *freq = freq.as_ref()
+                          .and_then(|ref f| delta.as_ref()
+                                                 .and_then(|ref d| f.checked_add(&d)
+                                                                    .ok_or_else(|| &Error::Overflow)));
               Some(freq.clone())
           })
 }
 
-pub fn strings_to_values<I, S, V>(string_deltas: S) -> impl Iterator<Item = Result<V>>
-                                             where I: IntoIterator<Item = V>,
-                                                   S: IntoIterator<Item = String>,
-                                                   V: Default + FromStr<Err = ParseIntError> + PrimInt, {
+pub fn strings_to_values<S, V>(string_deltas: S) -> impl Iterator<Item = Result<V>>
+                                                 where S: IntoIterator<Item = String>,
+                                                       V: Default + FromStr<Err = ParseIntError> + PrimInt, {
     string_deltas.into_iter()
                  .map(|s| s.parse::<V>().map_err(Error::InvalidInputError))
 }
-
