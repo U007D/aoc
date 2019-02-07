@@ -54,14 +54,16 @@
         clippy::maybe_infinite_iter, clippy::option_unwrap_used, clippy::result_unwrap_used)]
 // ^^^ End of safety-critical lint section ^^^
 #![allow(clippy::match_bool,)]
+
+use std::result::Result as StdResult;
+
 pub use {
     consts::*,
     error::Error,
 };
-use std::result::Result as StdResult;
 
 mod consts;
-pub mod error;
+mod error;
 #[cfg(test)]
 mod unit_tests;
 

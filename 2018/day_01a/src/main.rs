@@ -23,7 +23,7 @@ use std::{
         BufReader,
     },
 };
-fn read_args(filename: String) -> Result<Vec<i32>> {
+fn read_deltas(filename: String) -> Result<Vec<i32>> {
     BufReader::new(File::open(filename)?)
               .lines()
               .map(|line| Ok(line?.parse::<i32>()?))
@@ -32,7 +32,8 @@ fn read_args(filename: String) -> Result<Vec<i32>> {
 
 fn main() -> Result<()> {
     let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
-    println!("Aggregate frequency adjustment is {}.", TimeDevice::calc_final_frequency(read_args(args_fname)?)?);
+    let deltas = read_deltas(args_fname)?;
+    println!("Aggregate frequency adjustment is {}.", TimeDevice::calc_final_frequency(deltas)?);
     Ok(())
 }
 

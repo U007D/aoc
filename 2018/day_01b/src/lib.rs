@@ -40,17 +40,47 @@
 // ^^^ End of safety-critical lint section ^^^
 #![allow(clippy::match_bool,)]
 
-use std::result::Result as StdResult;
+use std::{
+    collections::HashSet,
+    iter::FromIterator,
+    result::Result as StdResult,
+};
 
 pub use {
     consts::*,
     error::Error,
 };
 
-pub use crate::time_device::TimeDevice;
-
 mod consts;
-
-pub mod error;
-pub mod time_device;
+#[cfg(test)]
+mod unit_tests;
+mod error;
 pub type Result<T> = StdResult<T, Error>;
+
+pub struct TimeDevice;
+
+impl TimeDevice {
+    pub fn first_duplicate_frequency<I>(deltas: I) -> Result<i32>
+                                                   where I: IntoIterator<Item = i32>,
+                                                         I::IntoIter: Clone, {
+        let mut past_frequencies = HashSet::<i32>::from_iter([0_i32].iter().cloned());
+        TimeDevice::frequency_stream(deltas).find(|freq| !past_frequencies.insert(*freq.as_ref().unwrap_or(&0)))
+                                .unwrap_or(Err(Error::ExhaustedDeltaValues))
+    }
+
+    fn frequency_stream<I>(deltas: I) -> impl Iterator<Item = Result<i32>>
+                                      where I: IntoIterator<Item = i32>,
+                                            I::IntoIter: Clone, {
+        deltas.into_iter()
+              .cycle()
+              .scan(Ok(0_i32), |freq, delta| {
+                  Some(freq.clone()
+                           .and_then(|f| {
+                               *freq = f.checked_add(delta)
+                                        .ok_or(Error::Overflow);
+                               freq.clone()
+                           }))
+              })
+
+    }
+}

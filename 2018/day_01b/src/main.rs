@@ -23,17 +23,16 @@ use std::{
         BufReader,
     },
 };
-fn read_args(filename: String) -> Result<Vec<String>> {
+fn read_deltas(filename: String) -> Result<Vec<i32>> {
     BufReader::new(File::open(filename)?)
               .lines()
-              .map(|line| Ok(line?))
+              .map(|line| Ok(line?.parse::<i32>()?))
               .collect()
 }
 
 fn main() -> Result<()> {
     let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
-    let args = read_args(args_fname)?;
-    let deltas = TimeDevice::strings_to_result_deltas::<_, i32>(args);
+    let deltas = read_deltas(args_fname)?;
     println!("First repeated frequency value is {}.", TimeDevice::first_duplicate_frequency(deltas)?);
     Ok(())
 }
