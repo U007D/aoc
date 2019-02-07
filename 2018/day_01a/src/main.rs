@@ -12,8 +12,8 @@
 #![allow(clippy::match_bool,)]
 
 use day_01a::{
-    calc_freq_delta_from_args,
     Result,
+    TimeDevice,
 };
 use std::{
     env,
@@ -23,16 +23,16 @@ use std::{
         BufReader,
     },
 };
-fn read_args(filename: String) -> Result<Vec<String>> {
+fn read_args(filename: String) -> Result<Vec<i32>> {
     BufReader::new(File::open(filename)?)
               .lines()
-              .map(|line| Ok(line?))
+              .map(|line| Ok(line?.parse::<i32>()?))
               .collect()
 }
 
 fn main() -> Result<()> {
     let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
-    println!("Aggregate frequency adjustment is {}.", calc_freq_delta_from_args(read_args(args_fname)?)?);
+    println!("Aggregate frequency adjustment is {}.", TimeDevice::calc_final_frequency(read_args(args_fname)?)?);
     Ok(())
 }
 

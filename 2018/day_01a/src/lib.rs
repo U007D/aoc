@@ -25,18 +25,18 @@
 //! For example, if the device displays frequency changes of +1, -2, +3, +1, then starting from a frequency of zero, the
 //! following changes would occur:
 //!
-//!     Current frequency  0, change of +1; resulting frequency  1.
-//!     Current frequency  1, change of -2; resulting frequency -1.
-//!     Current frequency -1, change of +3; resulting frequency  2.
-//!     Current frequency  2, change of +1; resulting frequency  3.
+//!   Current frequency  0, change of +1; resulting frequency  1.
+//!   Current frequency  1, change of -2; resulting frequency -1.
+//!   Current frequency -1, change of +3; resulting frequency  2.
+//!   Current frequency  2, change of +1; resulting frequency  3.
 //!
 //! In this example, the resulting frequency is 3.
 //!
 //! Here are other example situations:
 //!
-//!     +1, +1, +1 results in  3
-//!     +1, +1, -2 results in  0
-//!     -1, -2, -3 results in -6
+//!   +1, +1, +1 results in  3
+//!   +1, +1, -2 results in  0
+//!   -1, -2, -3 results in -6
 //!
 //! Starting with a frequency of zero, what is the resulting frequency after all of the changes in frequency have been
 //! applied?
@@ -62,16 +62,17 @@ use std::result::Result as StdResult;
 
 mod consts;
 pub mod error;
+#[cfg(test)]
+mod unit_tests;
 
 pub type Result<T> = StdResult<T, Error>;
 
-pub fn calc_freq_delta_from_args(args: Vec<String>) -> Result<i32> {
-    args.iter()
-        .map(|s| s.parse::<i32>()
-                  .or_else(|e| Err(Error::InvalidInputError(e))))
-        .try_fold(0_i32, |sum, el| match el {
-            Ok(v) => sum.checked_add(v)
-                        .ok_or(Error::Overflow),
-            e => e,
-        })
+pub struct TimeDevice;
+
+impl TimeDevice {
+    pub fn calc_final_frequency(deltas: impl IntoIterator<Item = i32>) -> Result<i32> {
+        deltas.into_iter()
+              .try_fold(0_i32, |sum, delta| sum.checked_add(delta))
+              .ok_or(Error::Overflow)
+    }
 }
