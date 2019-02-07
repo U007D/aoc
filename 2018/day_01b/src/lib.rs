@@ -40,58 +40,17 @@
 // ^^^ End of safety-critical lint section ^^^
 #![allow(clippy::match_bool,)]
 
-use std::{
-    collections::HashSet,
-    hash::Hash,
-    iter::FromIterator,
-    num::ParseIntError,
-    result::Result as StdResult,
-    str::FromStr
-};
-
-use num_traits::PrimInt;
+use std::result::Result as StdResult;
 
 pub use {
     consts::*,
     error::Error,
 };
 
+pub use crate::time_device::TimeDevice;
+
 mod consts;
-#[cfg(test)]
-mod unit_tests;
 
 pub mod error;
-
+pub mod time_device;
 pub type Result<T> = StdResult<T, Error>;
-
-pub fn find_first_repeating_frequency<I, V>(deltas: I) -> Result<V>
-                                                       where I: IntoIterator<Item = Result<V>>,
-                                                             I::IntoIter: Clone,
-                                                             V: Default + Eq + Hash + PrimInt, {
-    let mut freqs = HashSet::<V>::from_iter([V::default()].iter().cloned());
-    freq_iter(deltas).find(|res| !freqs.insert(*res.as_ref().unwrap_or(&V::default())))
-                     .expect(msg::ERR_INTERNAL_EXHAUSTED_DELTA_VALUES)
-}
-
-fn freq_iter<I, V>(deltas: I) -> impl Iterator<Item = Result<V>>
-                              where I: IntoIterator<Item = Result<V>>,
-                                    I::IntoIter: Clone,
-                                    V: Default + PrimInt, {
-    let init = Ok(V::default());
-    deltas.into_iter()
-          .cycle()
-          .scan(init, |freq, delta| {
-              *freq = freq.as_ref()
-                          .and_then(|ref f| delta.as_ref()
-                                                 .and_then(|ref d| f.checked_add(&d)
-                                                                    .ok_or_else(|| &Error::Overflow)));
-              Some(freq.clone())
-          })
-}
-
-pub fn strings_to_values<S, V>(string_deltas: S) -> impl Iterator<Item = Result<V>>
-                                                 where S: IntoIterator<Item = String>,
-                                                       V: Default + FromStr<Err = ParseIntError> + PrimInt, {
-    string_deltas.into_iter()
-                 .map(|s| s.parse::<V>().map_err(Error::InvalidInputError))
-}

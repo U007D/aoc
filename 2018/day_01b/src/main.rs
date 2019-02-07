@@ -12,9 +12,8 @@
 #![allow(clippy::match_bool,)]
 
 use day_01b::{
-    find_first_repeating_frequency,
+    TimeDevice,
     Result,
-    strings_to_values,
 };
 use std::{
     env,
@@ -34,8 +33,8 @@ fn read_args(filename: String) -> Result<Vec<String>> {
 fn main() -> Result<()> {
     let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
     let args = read_args(args_fname)?;
-    let deltas = strings_to_values(args);
-    println!("First repeated frequency value is {}.", find_first_repeating_frequency(deltas)?);
+    let deltas = TimeDevice::strings_to_result_deltas::<_, i32>(args);
+    println!("First repeated frequency value is {}.", TimeDevice::first_duplicate_frequency(deltas)?);
     Ok(())
 }
 

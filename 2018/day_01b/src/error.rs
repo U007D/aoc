@@ -11,8 +11,8 @@ pub enum Error {
     IoError(IoError),
     #[display(fmt = "{}", "msg::ERR_OVERFLOW_I32")]
     Overflow,
-    RepeatedFrequency(i32),
-    NoMoreDeltas,
+    #[display(fmt = "{}", "msg::ERR_INTERNAL_EXHAUSTED_DELTA_VALUES")]
+    ExhaustedDeltaValues,
 }
 
 impl From<StdIoError> for Error {
