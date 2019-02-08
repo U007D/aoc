@@ -11,9 +11,9 @@
 // ^^^ End of safety-critical lint section ^^^
 #![allow(clippy::match_bool,)]
 
-use day_01a::{
-    Result,
+use day_02a::{
     Device,
+    Result,
 };
 use std::{
     env,
@@ -23,17 +23,17 @@ use std::{
         BufReader,
     },
 };
-fn read_deltas(filename: String) -> Result<Vec<i32>> {
+fn read_ids(filename: String) -> Result<Vec<String>> {
     BufReader::new(File::open(filename)?)
               .lines()
-              .map(|line| Ok(line?.parse::<i32>()?))
+              .map(|line| Ok(line?))
               .collect()
 }
 
 fn main() -> Result<()> {
     let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
-    let deltas = read_deltas(args_fname)?;
-    println!("Aggregate frequency adjustment is {}.", Device::calc_final_frequency(deltas)?);
+    let ids = read_ids(args_fname)?;
+    println!("First repeated frequency value is {}.", Device::checksum(ids));
     Ok(())
 }
 

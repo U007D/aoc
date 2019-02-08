@@ -3,6 +3,7 @@
 members = [
     "2018/day_01a",
     "2018/day_01b",
+    "2018/day_02a",
 ]
 
 [profile.dev]

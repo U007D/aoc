@@ -12,7 +12,7 @@
 #![allow(clippy::match_bool,)]
 
 use day_01b::{
-    TimeDevice,
+    Device,
     Result,
 };
 use std::{
@@ -33,7 +33,7 @@ fn read_deltas(filename: String) -> Result<Vec<i32>> {
 fn main() -> Result<()> {
     let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
     let deltas = read_deltas(args_fname)?;
-    println!("First repeated frequency value is {}.", TimeDevice::first_duplicate_frequency(deltas)?);
+    println!("First repeated frequency value is {}.", Device::first_duplicate_frequency(deltas)?);
     Ok(())
 }
 

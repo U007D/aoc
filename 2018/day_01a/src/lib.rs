@@ -69,9 +69,9 @@ mod unit_tests;
 
 pub type Result<T> = StdResult<T, Error>;
 
-pub struct TimeDevice;
+pub struct Device;
 
-impl TimeDevice {
+impl Device {
     pub fn calc_final_frequency(deltas: impl IntoIterator<Item = i32>) -> Result<i32> {
         deltas.into_iter()
               .try_fold(0_i32, |sum, delta| sum.checked_add(delta))

@@ -57,15 +57,15 @@ mod unit_tests;
 mod error;
 pub type Result<T> = StdResult<T, Error>;
 
-pub struct TimeDevice;
+pub struct Device;
 
-impl TimeDevice {
+impl Device {
     pub fn first_duplicate_frequency<I>(deltas: I) -> Result<i32>
                                                    where I: IntoIterator<Item = i32>,
                                                          I::IntoIter: Clone, {
-        let mut past_frequencies = HashSet::<i32>::from_iter([0_i32].iter().cloned());
-        TimeDevice::frequency_stream(deltas).find(|freq| !past_frequencies.insert(*freq.as_ref().unwrap_or(&0)))
-                                .unwrap_or(Err(Error::ExhaustedDeltaValues))
+        let mut seen = HashSet::<i32>::from_iter([0_i32].iter().cloned());
+        Device::frequency_stream(deltas).find(|freq| !seen.insert(*freq.as_ref().unwrap_or(&0)))
+                                        .unwrap_or(Err(Error::ExhaustedDeltaValues))
     }
 
     fn frequency_stream<I>(deltas: I) -> impl Iterator<Item = Result<i32>>

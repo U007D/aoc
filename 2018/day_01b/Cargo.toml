@@ -6,7 +6,7 @@ edition = "2018"
 
 [[bin]]
 doc = false
-name = "day_01"
+name = "day_01b"
 path = "src/main.rs"
 test = false
 
