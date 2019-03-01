@@ -6,11 +6,11 @@ mod wrapped;
 
 #[derive(Clone, Debug, Display, From, PartialEq)]
 pub enum Error {
-    EnvVarError(std::env::VarError),
-    InvalidInputError(std::num::ParseIntError),
-    IoError(IoError),
     #[display(fmt = "{}", "msg::ERR_OVERFLOW_I32")]
     Overflow,
+    InvalidInputError(std::num::ParseIntError),
+    IoError(IoError),
+    EnvVarError(std::env::VarError),
     #[display(fmt = "{}", "msg::ERR_INTERNAL_EXHAUSTED_DELTA_VALUES")]
     ExhaustedDeltaValues,
 }

@@ -6,5 +6,5 @@ fn test_case_1() {
                    "aabcdd", "abcdee", "ababab"].iter()
                                                 .map(|s| s.to_string())
                                                 .collect::<Vec<_>>();
-    assert_eq!(Device::checksum(ids), 12);
+    assert_eq!(Device::checksum(ids), Some(12));
 }

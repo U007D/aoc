@@ -1,9 +1,8 @@
 [workspace]
 
 members = [
-    "2018/day_01a",
-    "2018/day_01b",
-    "2018/day_02a",
+    "2018/day_01",
+    "2018/day_02",
 ]
 
 [profile.dev]

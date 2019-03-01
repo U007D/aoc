@@ -40,14 +40,12 @@
 //!
 //! Starting with a frequency of zero, what is the resulting frequency after all of the changes in frequency have been
 //! applied?
-
 #![warn(clippy::all)]
 #![forbid(unsafe_code)] // Do not remove!  Explicitly change to #![allow(unsafe_code)] to use `unsafe` keyword.
 #![forbid(overflowing_literals)]
-#![deny(warnings)]
-//#![deny(missing_docs)]
+//#![deny(warnings)]
 // Uncomment before ship to reconcile use of possibly redundant crates and uncover possible debug remnants
-//#![warn(clippy::multiple_crate_versions, clippy::print_stdout, clippy::unimplemented, clippy::use_debug)]
+//#![warn(clippy::multiple_crate_versions, clippy::print_stdout, clippy::unimplemented, clippy::use_debug, missing_docs)]
 // vvv Safety-critical application lints (pedantic: use for safety-critical applications only) vvv
 #![deny(clippy::cast_possible_truncation, clippy::cast_possible_wrap, clippy::cast_precision_loss,
         clippy::cast_sign_loss, clippy::float_cmp_const, clippy::indexing_slicing, clippy::integer_arithmetic,
@@ -55,26 +53,44 @@
 // ^^^ End of safety-critical lint section ^^^
 #![allow(clippy::match_bool,)]
 
-use std::result::Result as StdResult;
+use std::{
+    env,
+    fs::File,
+    io::{
+        BufRead,
+        BufReader,
+    },
+    result::Result as StdResult
+};
 
 pub use {
     consts::*,
+    device::Device,
     error::Error,
 };
 
 mod consts;
+mod device;
 mod error;
 #[cfg(test)]
 mod unit_tests;
 
 pub type Result<T> = StdResult<T, Error>;
 
-pub struct Device;
-
-impl Device {
-    pub fn calc_final_frequency(deltas: impl IntoIterator<Item = i32>) -> Result<i32> {
-        deltas.into_iter()
-              .try_fold(0_i32, |sum, delta| sum.checked_add(delta))
-              .ok_or(Error::Overflow)
-    }
+fn read_deltas(filename: String) -> Result<Vec<i32>> {
+    BufReader::new(File::open(filename)?)
+              .lines()
+              .map(|line| Ok(line?.parse::<i32>()?))
+              .collect()
 }
+
+fn main() -> Result<()> {
+    let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
+    let deltas = read_deltas(args_fname)?;
+    println!("Day 1 (part 1): Aggregate frequency adjustment is {}.", Device::calc_final_frequency(deltas.iter())?);
+    println!("Day 1 (part 2): 1st repeated frequency value is {}.", Device::first_duplicate_frequency(deltas.iter())?);
+    Ok(())
+}
+
+
+
