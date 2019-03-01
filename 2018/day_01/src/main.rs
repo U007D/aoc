@@ -63,8 +63,7 @@ use std::{
     result::Result as StdResult
 };
 
-pub use {
-    consts::*,
+use {
     device::Device,
     error::Error,
 };
@@ -87,8 +86,8 @@ fn read_deltas(filename: String) -> Result<Vec<i32>> {
 fn main() -> Result<()> {
     let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
     let deltas = read_deltas(args_fname)?;
-    println!("Day 1 (part 1): Aggregate frequency adjustment is {}.", Device::calc_final_frequency(deltas.iter())?);
-    println!("Day 1 (part 2): 1st repeated frequency value is {}.", Device::first_duplicate_frequency(deltas.iter())?);
+    println!("Day 1 (part 1): Aggregate frequency adjustment is {}.", Device::calc_final_frequency(&deltas)?);
+    println!("Day 1 (part 2): 1st repeated frequency value is {}.", Device::find_first_duplicate_frequency(&deltas)?);
     Ok(())
 }
 

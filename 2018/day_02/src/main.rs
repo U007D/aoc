@@ -82,6 +82,6 @@ fn read_ids(filename: String) -> Result<Vec<String>> {
 fn main() -> Result<()> {
     let args_fname = env::var("CARGO_MANIFEST_DIR")? + "/puzzle_input.nsv";
     let ids = read_ids(args_fname)?;
-    println!("Day 2 part 1: First repeated frequency value is {}.", Device::checksum(ids).ok_or(Error::Overflow)?);
+    println!("Day 2 part 1: First repeated frequency value is {}.", Device::checksum(&ids).ok_or(Error::Overflow)?);
     Ok(())
 }
