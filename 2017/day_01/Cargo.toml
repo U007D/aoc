@@ -1,0 +1,9 @@
+[package]
+name = "day_01"
+version = "0.1.0"
+authors = ["Brad Gibson <b2b@humanenginuity.com>"]
+edition = "2018"
+
+[dependencies.failure]
+version = "=0.1.3"
+features = ["derive"]

@@ -1,0 +1,62 @@
+[package]
+name = "day_02"
+version = "0.1.0"
+authors = ["Brad Gibson <b2b@humanenginuity.com>"]
+
+[lib]
+name = "blank_template"
+path = "src/lib.rs"
+
+[[bin]]
+doc = false
+name = "day_02"
+path = "src/main.rs"
+test = false
+
+[dependencies]
+failure = "0.1.1"
+hesl = { git = "ssh://git@github.com/humanenginuity/hesl" }
+num-traits = "0.2.4"
+
+[dependencies.clippy]
+optional = true
+version = "0.0.196"
+
+[dev-dependencies]
+rspec = "1.0.0-beta.4"
+
+[profile.bench]
+codegen-units = 1
+debug = false
+debug-assertions = false
+lto = true
+opt-level = 3
+#panic = "unwind" #panic = "unwind" required by bench harness; panic setting is ignored
+rpath = false
+
+[profile.dev]
+codegen-units = 1
+debug = true
+debug-assertions = true
+lto = false
+opt-level = 0
+panic = "unwind"
+rpath = false
+
+[profile.release]
+codegen-units = 1
+debug = false
+debug-assertions = false
+lto = true
+opt-level = 3
+panic = "unwind"
+rpath = false
+
+[profile.test]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+lto = false
+opt-level = 0
+#panic = "unwind" #panic = "unwind" required by bench harness; panic setting is ignored
+rpath = false
